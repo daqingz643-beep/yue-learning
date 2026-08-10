@@ -1699,7 +1699,7 @@
             const dialogue = section.dialogues[0];
             // 句子音频命名：C{学期}_U{单元}_M{小节}_D{对话ID}_S{句子索引}_{语言}.mp3
             const langCode = currentLang === 'yue' ? 'YUE' : 'MAN';
-            const fileName = `C${currentCourseId}_U${currentUnitId}_M${currentSectionIndex + 1}_${dialogue.id}_S${index}_${langCode}.mp3`;
+            const fileName = `第二回部署/C${currentCourseId}_U${currentUnitId}_M${currentSectionIndex + 1}_${dialogue.id}_S${index}_${langCode}.mp3`;
             const resultDiv = document.getElementById('dialogue-sentence-result');
             if (resultDiv) resultDiv.innerHTML = `🔊 正在加载: ${fileName} ...`;
             const audio = new Audio(fileName);
@@ -1863,7 +1863,7 @@
             const courseId = currentCourseId;
             const unitId = currentUnitId;
             const sectionId = currentSectionIndex + 1;
-            const fileName = `C${currentCourseId}_U${currentUnitId}_M${currentSectionIndex + 1}_${vocab.id}_${langCode}.mp3`;
+            const fileName = `第二回部署/C${currentCourseId}_U${currentUnitId}_M${currentSectionIndex + 1}_${vocab.id}_${langCode}.mp3`;
             // 这样会变成 C1_U1_M1_D1_S0_YUE.mp3 ✅
             const status = document.getElementById('result-area');
             if (status) status.innerHTML = `🔊 正在加载: ${fileName} ...`;
