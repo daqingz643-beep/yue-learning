@@ -695,6 +695,11 @@
         let currentSectionIndex = 0;
         let currentVocabIndex = 0;
         let currentLang = 'yue';
+        // 会话进度（每次进入小节时重置）
+        let sessionProgress = {
+            vocabScored: new Set(),
+            sentenceScored: {yue: new Set(), zh: new Set()}
+        };
 
         // ================================================================
         // 3. 数据持久化
@@ -726,9 +731,6 @@
             dayData.totalScore += score;
             dayData.count += 1;
 
-            // ★★★ 累加到总积分（每次评分得分都加入总积分） ★★★
-            store.totalPoints = (store.totalPoints || 0) + score;
-
             saveStore(store);
             updateDailyCompletion();
             updateTotalPoints();
@@ -744,16 +746,15 @@
             const store = getStore();
             store.achievements[key] = true;
             saveStore(store);
+            // ★★★ 记录会话进度 ★★★
+            sessionProgress.vocabScored.add(vocabId);
             checkAndShowCompletion();
         }
 
         function checkAllVocabScored(section) {
-            const store = getStore();
-            for (let v of section.vocabularies) {
-                const key = `practiced_${currentCourseId}_${currentUnitId}_${section.id}_${v.id}`;
-                if (!store.achievements[key]) return false;
-            }
-            return true;
+            // ★★★ 改为检查会话进度 ★★★
+            const allIds = section.vocabularies.map(v => v.id);
+            return allIds.every(id => sessionProgress.vocabScored.has(id));
         }
 
         // ================================================================
@@ -888,6 +889,12 @@
         }
 
         function selectSection(index) {
+            // ★★★ 重置所有会话进度 ★★★
+            sessionProgress.vocabScored = new Set();
+            sessionProgress.sentenceScored = {yue: new Set(), zh: new Set()};
+            // 可选：如果关键词也要强制重新评分，可添加：
+            sessionProgress.keywordScored = {yue: new Set(), zh: new Set()}; // 需在全局定义中先添加
+
             currentSectionIndex = index;
             currentVocabIndex = 0;
             showPage('page-practice');
@@ -1185,31 +1192,16 @@
             const unit = course.units.find(u => u.id === currentUnitId);
             const section = unit.sections[currentSectionIndex];
             const dialogue = section.dialogues[0];
-            const store = getStore();
-            const day = today();
-            const dayData = store.dailyRecords[day];
-            if (!dayData) {
-                console.log('dayData 不存在，退出');
-                return;
-            }
 
-            // 1. 检查所有句子是否已完成（得分≥60）
+            // ★★★ 1. 检查所有句子是否已完成（基于该语言的会话进度） ★★★
+            const langKey = lang === 'yue' ? 'yue' : 'zh';
+            const scoredSet = sessionProgress.sentenceScored[langKey];
             let allSentencesDone = true;
-            for (let i = 0; i < dialogue.lines.length; i++) {
-                const task = dayData.tasks.find(t =>
-                    t.courseId === currentCourseId && t.unitId === currentUnitId &&
-                    t.sectionId === section.id && t.itemId === `S${i}` &&
-                    t.type === `dialogue_sentence_${lang === 'yue' ? 'YUE' : 'MAN'}`
-                );
-                if (!task || task.scores.length === 0) {
+            const totalSentences = dialogue.lines.length;
+            for (let i = 0; i < totalSentences; i++) {
+                if (!scoredSet.has(i)) {
                     allSentencesDone = false;
-                    console.log(`句子 S${i} 未完成或没有评分`);
-                    break;
-                }
-                const avg = task.scores.reduce((a, b) => a + b, 0) / task.scores.length;
-                if (avg < 60) {
-                    allSentencesDone = false;
-                    console.log(`句子 S${i} 平均分 ${avg} < 60`);
+                    console.log(`句子 S${i} 未在本次会话中评分 (${lang})`);
                     break;
                 }
             }
@@ -1219,39 +1211,13 @@
             }
             console.log('所有句子已完成');
 
-            // 2. 检查关键词是否已全部完成
-            let allKeywordsDone = true;
-            for (let i = 0; i < dialogue.keyWords.length; i++) {
-                const task = dayData.tasks.find(t =>
-                    t.courseId === currentCourseId && t.unitId === currentUnitId &&
-                    t.sectionId === section.id && t.itemId === `K${i}` &&
-                    t.type === `dialogue_keyword_${lang === 'yue' ? 'YUE' : 'MAN'}`
-                );
-                if (!task || task.scores.length === 0) {
-                    allKeywordsDone = false;
-                    console.log(`关键词 K${i} 未完成或没有评分`);
-                    break;
-                }
-                const avg = task.scores.reduce((a, b) => a + b, 0) / task.scores.length;
-                if (avg < 60) {
-                    allKeywordsDone = false;
-                    console.log(`关键词 K${i} 平均分 ${avg} < 60`);
-                    break;
-                }
-            }
-            if (allKeywordsDone) {
-                console.log('关键词已全部完成，不需要引导');
-                return;
-            }
-            console.log('关键词未全部完成，触发引导');
-
-            // 3. 句子完成但关键词未完成 → 引导进入关键词填空
-            // 调用通关弹窗风格引导
+            // ★★★ 2. 复习时也强制弹出重点词引导（不再检测关键词是否已完成） ★★★
+            console.log('触发重点词引导弹窗（复习或首次学习均弹出）');
             showCompletionModal(
                 section.name,
-                false, // 没有对话（但这里我们自定义）
+                false,
                 '🎯 句子练习完成！<br>快来进行重点词复习吧！',
-                50,   // 奖励50积分
+                0,   // 此弹窗不发放积分，积分在关键词完成后发放
                 '进入重点词练习 →',
                 function () {
                     closeCompletionModal();
@@ -1266,6 +1232,7 @@
             const section = getCurrentSection();
             const store = getStore();
             const rewardKey = `dialogue_${lang}_done_${currentCourseId}_${currentUnitId}_${section.id}`;
+            const reviewCountKey = `review_count_${currentCourseId}_${currentUnitId}_${section.id}`;
 
             // 1. 检查该语言是否全部完成（实时检测）
             if (!checkDialogueCompletionByLang(lang)) {
@@ -1273,37 +1240,71 @@
                 return;
             }
 
-            // 2. 发放积分（仅一次）
-            if (!store.achievements[rewardKey]) {
-                const points = 50;
-                store.totalPoints = (store.totalPoints || 0) + points;
+            // 2. 判断是首次完成还是复习
+            const isFirstTime = !store.achievements[rewardKey];
+            let points = 0;
+            let isReviewValid = false;
+
+            if (isFirstTime) {
+                // 首次完成 → 8 积分（0.08元）
+                points = 8;
                 store.achievements[rewardKey] = true;
+                // ★★★ 强制保存，确保标记持久化 ★★★
                 saveStore(store);
-                console.log('积分已发放（首次），总积分:', store.totalPoints);
+                console.log('首次完成，发放 8 积分，已标记 rewardKey');
             } else {
-                console.log('积分已发放过，本次不重复发放');
+                // 复习 → 检查复习次数
+                const reviewCount = store[reviewCountKey] || 0;
+                if (reviewCount < 20) {
+                    points = 2;
+                    store[reviewCountKey] = reviewCount + 1;
+                    isReviewValid = true;
+                    saveStore(store);
+                    console.log(`复习第 ${reviewCount + 1} 次，发放 2 积分`);
+                } else {
+                    points = 0;
+                    console.log('复习已达20次上限，本次不发放积分');
+                }
             }
 
-            // 3. 弹窗引导（基于实时完成状态，不依赖标记）
+            // 3. 累计总积分（仅当 points > 0）
+            if (points > 0) {
+                store.totalPoints = (store.totalPoints || 0) + points;
+                saveStore(store);
+            }
+
+            // 4. 检查两种语言是否都已完成（用于决定弹窗内容）
             const yueDone = checkDialogueCompletionByLang('yue');
             const zhDone = checkDialogueCompletionByLang('zh');
+            const bothDone = yueDone && zhDone;
 
-            if (yueDone && zhDone) {
-                // 两种语言都完成 → 单元结算弹窗
-                console.log('两种语言都已完成，弹出单元结算弹窗');
+            // 5. 弹窗引导
+            if (bothDone) {
+                // 两种语言都完成 → 单元结算/积分入账弹窗
+                let title, hint;
+                if (isFirstTime) {
+                    title = '🎉 恭喜你！<br>已完成第一单元所有知识！';
+                    hint = '📚 全新学习完成，获得 8 积分（0.08元）！';
+                } else if (isReviewValid) {
+                    title = '📚 复习完成！';
+                    hint = `✅ 本次复习获得 +${points} 积分（0.02元），已复习 ${store[reviewCountKey] || 0}/20 次`;
+                } else {
+                    title = '📚 复习完成！';
+                    hint = '✅ 已达到20次复习上限，本次不获得积分，继续巩固吧！';
+                }
                 showCompletionModal(
                     section.name,
                     false,
-                    '🎉 恭喜你！<br>已完成第一单元所有知识！',
-                    50,  // 积分已发放，这里只显示，不再次累加
+                    title,
+                    points,
                     '返回单元页面',
                     function () {
                         closeCompletionModal();
                         showPage('page-units');
                         renderUnits();
                     },
-                    '📚 复习整个单元，积分更多哦！',
-                    true   // 隐藏次要按钮
+                    hint,
+                    true
                 );
             } else {
                 // 只有当前语言完成 → 语言切换引导
@@ -1315,7 +1316,7 @@
                     section.name,
                     false,
                     `🎉 真棒！<br>你已经练习完${langName}第一单元对话！`,
-                    50,
+                    points,
                     `切换至${targetLangName}练习 →`,
                     function () {
                         closeCompletionModal();
@@ -1323,8 +1324,8 @@
                         renderDialoguePractice();
                         highlightLangButton(targetLang);
                     },
-                    '🌟 完成两种语言对话，获得双倍积分！',
-                    false   // 显示次要按钮（返回小节列表）
+                    isFirstTime ? '🌟 完成两种语言对话，获得双倍积分！' : '📖 继续复习另一种语言吧！',
+                    false
                 );
             }
         }
@@ -1531,8 +1532,6 @@
         }
 
         function renderDialoguePractice() {
-            window.currentSentenceIndex = 0; // ★★★ 每次进入对话页重置
-            // ... 原有代码 ...
             const course = courses.find(c => c.id === currentCourseId);
             const unit = course.units.find(u => u.id === currentUnitId);
             const section = unit.sections[currentSectionIndex];
@@ -1551,9 +1550,9 @@
 
             // ★★★ 语言切换 ★★★
             html += `<div class="lang-toggle">
-                <button class="btn btn-outline ${currentLang === 'yue' ? 'active' : ''}" id="lang-yue" onclick="switchLanguage('yue')">🇭🇰 粤语</button>
-                <button class="btn btn-outline ${currentLang === 'zh' ? 'active' : ''}" id="lang-zh" onclick="switchLanguage('zh')">🇨🇳 普通话</button>
-             </div>`;
+        <button class="btn btn-outline ${currentLang === 'yue' ? 'active' : ''}" id="lang-yue" onclick="switchLanguage('yue')">🇭🇰 粤语</button>
+        <button class="btn btn-outline ${currentLang === 'zh' ? 'active' : ''}" id="lang-zh" onclick="switchLanguage('zh')">🇨🇳 普通话</button>
+     </div>`;
 
             // ★★★ 对话展示（关键词高亮 + 小喇叭） ★★★
             html += `<div class="dialogue-box">`;
@@ -1574,9 +1573,9 @@
 
             // ★★★ 模式选择按钮 ★★★
             html += `<div style="display:flex; gap:12px; margin:12px 0;">
-                <button class="btn btn-primary" id="mode-sentence" onclick="setDialogueMode('sentence')">📖 逐句跟读</button>
-                <button class="btn btn-outline" id="mode-keyword" onclick="setDialogueMode('keyword')">✍️ 重点词填空</button>
-             </div>`;
+        <button class="btn btn-primary" id="mode-sentence" onclick="setDialogueMode('sentence')">📖 逐句跟读</button>
+        <button class="btn btn-outline" id="mode-keyword" onclick="setDialogueMode('keyword')">✍️ 重点词填空</button>
+     </div>`;
 
             // ★★★ 练习区域 ★★★
             html += `<div id="dialogue-practice-area" style="margin-top:12px;">`;
@@ -1744,8 +1743,12 @@
             const score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
             const langSuffix = currentLang === 'yue' ? 'YUE' : 'MAN';
             recordScore(currentCourseId, currentUnitId, section.id, `S${index}`, `dialogue_sentence_${langSuffix}`, score);
+
+            // ★★★ 按语言记录句子会话进度 ★★★
+            const langKey = currentLang === 'yue' ? 'yue' : 'zh';
+            sessionProgress.sentenceScored[langKey].add(index);
+
             showScoreAnimation(window.innerWidth / 2, window.innerHeight / 2);
-            // ★★★ 只保留关键词引导，移除语言切换调用 ★★★
             checkAndGuideAfterSentenceDone(currentLang);
             // 延迟执行高亮，确保按钮已渲染
             setTimeout(() => highlightNextButton(8000), 500);
@@ -1816,9 +1819,13 @@
         // ================================================================
         function switchLanguage(lang) {
             currentLang = lang;
+            // ★★★ 重置该语言的句子会话进度 ★★★
+            const langKey = lang === 'yue' ? 'yue' : 'zh';
+            sessionProgress.sentenceScored[langKey] = new Set();
+
             const dialoguePage = document.getElementById('page-dialogue');
             if (!dialoguePage.classList.contains('hidden')) {
-                window.currentSentenceIndex = 0; // ★★★ 切换语言时重置索引
+                window.currentSentenceIndex = 0;
                 renderDialoguePractice();
             } else {
                 renderPractice();
