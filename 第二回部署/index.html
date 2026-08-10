@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>粤讲粤对 · 自动弹窗版</title>
+    <style>
+        /* ===== 样式（不变） ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'PingFang SC', sans-serif;
+        }
+
+        body {
+            background: #f0f2f6;
+            padding: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .standard-text {
+            font-size: 36px;
+            font-weight: 600;
+            text-align: center;
+            padding: 20px;
+            background: #f0f5ff;
+            border-radius: 16px;
+            margin: 12px 0;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 40px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            min-height: 56px;
+        }
+
+        .btn-primary {
+            background: #007aff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #34c759;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .btn-outline {
+            background: #f0f2f6;
+            color: #1a1a2e;
+            border: 1px solid #ddd;
+        }
+
+        .btn-outline.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+
+        .btn-sm {
+            flex: 0 1 auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            min-height: 36px;
+            min-width: 50px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 17px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            background: #fafafa;
+            outline: none;
+            min-width: 150px;
+        }
+
+        .lang-toggle {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        #result-area {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f7f8fc;
+            border-radius: 16px;
+            border-left: 4px solid #007aff;
+            line-height: 2;
+        }
+
+        .status {
+            margin: 12px 0;
+            padding: 12px;
+            background: #f7f8fc;
+            border-radius: 12px;
+            text-align: center;
+            color: #555;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .dialogue-box {
+            background: #f7f9fc;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 12px 0;
+            border-left: 4px solid #34c759;
+        }
+
+        .dialogue-box .line {
+            margin-bottom: 6px;
+        }
+
+        .mine-stat {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .mine-stat .stat-item .num {
+            font-size: 28px;
+            font-weight: 700;
+            color: #007aff;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: #34c759;
+            border-radius: 8px;
+            transition: width 0.3s;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .modal-box .btn {
+            width: 100%;
+        }
+
+        .recording {
+            background-color: #ffebee !important;
+            border-color: #ff3b30 !important;
+        }
+
+        .recording .btn-danger {
+            background: #ff3b30;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* ===== 通关弹窗 ===== */
+        .completion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .completion-overlay.active {
+            display: flex;
+        }
+
+        .completion-modal {
+            background: linear-gradient(145deg, #fff5e6, #ffe0d0);
+            border-radius: 32px;
+            padding: 32px 28px 28px;
+            max-width: 400px;
+            width: 92%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            border: 2px solid #ffb88a;
+        }
+
+        .completion-modal .stars {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            font-size: 28px;
+            letter-spacing: 12px;
+            color: #ffd966;
+            text-shadow: 0 0 8px #ffaa00;
+            pointer-events: none;
+        }
+
+        .completion-modal .stars span {
+            display: inline-block;
+            animation: twinkle 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.3;
+                transform: scale(0.9);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        .completion-modal .trophy {
+            font-size: 56px;
+            margin: 8px 0 6px;
+        }
+
+        .completion-modal .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #b45f2b;
+            margin: 4px 0 8px;
+            line-height: 1.3;
+        }
+
+        .completion-modal .title span {
+            background: linear-gradient(135deg, #f7b731, #f5a623);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .completion-modal .points-box {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 60px;
+            padding: 12px 20px;
+            display: inline-block;
+            margin: 8px 0 12px;
+            border: 1px solid #ffb07c;
+        }
+
+        .completion-modal .points-box .label {
+            font-size: 16px;
+            color: #a35d2a;
+        }
+
+        .completion-modal .points-box .score {
+            font-size: 38px;
+            font-weight: 800;
+            color: #e67e22;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .completion-modal .points-box .score-anim {
+            animation: popUp 0.6s ease-out;
+        }
+
+        @keyframes popUp {
+            0% {
+                transform: scale(0.5) translateY(20px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.2) translateY(-10px);
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .completion-modal .total-points {
+            font-size: 18px;
+            color: #7f4a24;
+            margin: 4px 0 8px;
+        }
+
+        .completion-modal .total-points strong {
+            color: #c0392b;
+            font-size: 22px;
+        }
+
+        .completion-modal .withdraw {
+            background: #fce8d5;
+            border-radius: 30px;
+            padding: 6px 16px;
+            display: inline-block;
+            font-size: 15px;
+            color: #c0392b;
+            margin: 4px 0 12px;
+            border: 1px dashed #e67e22;
+        }
+
+        .completion-modal .withdraw .amount {
+            font-weight: 700;
+            font-size: 18px;
+            color: #e67e22;
+        }
+
+        .completion-modal .hint {
+            font-size: 13px;
+            color: #a67c5a;
+            margin: 4px 0 16px;
+        }
+
+        .completion-modal .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .completion-modal .btn-primary {
+            background: linear-gradient(135deg, #f7b731, #f5a623);
+            border: none;
+            border-radius: 50px;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .completion-modal .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        .completion-modal .btn-secondary {
+            background: transparent;
+            border: 2px solid #b88a6a;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f4a24;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .completion-modal .btn-secondary:active {
+            background: #f0d5c0;
+        }
+
+        /* ... 原有的其他样式 ... */
+
+        /* ===== 评分动画（+1 浮动 + 彩带） ===== */
+        .float-score {
+            position: fixed;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff9500;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatUp 4s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.8);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-120px) scale(1.5);
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            font-size: 30px;
+            pointer-events: none;
+            z-index: 9998;
+            animation: confettiFall 1.5s linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(200px) rotate(720deg);
+            }
+        }
+
+        /* ===== 卡片进度列表样式 ===== */
+        .progress-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .progress-card:active {
+            transform: scale(0.97);
+        }
+
+        .progress-card .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+
+        .progress-wrap {
+            height: 14px;
+            background: #e4edf9;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #9333ea);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .progress-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #1a1a2e;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+            position: absolute;
+            top: -6px;
+            /* left 由 JS 动态设置 */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== 顶部导航 ===== -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <button class="btn btn-outline" id="back-btn" onclick="goBack()" style="flex:0 1 auto; min-width:60px;">‹
+            返回</button>
+        <span id="header-title" style="font-size:20px; font-weight:600;">粤讲粤对</span>
+        <span style="width:60px;"></span>
+    </div>
+
+    <!-- ===== 主内容 ===== -->
+    <div id="main-content">
+        <div id="page-courses">
+            <div class="card" id="course-list"></div>
+        </div>
+        <div id="page-units" class="hidden">
+            <div class="card" id="unit-list"></div>
+        </div>
+        <div id="page-sections" class="hidden">
+            <div class="card" id="section-list"></div>
+        </div>
+        <div id="page-practice" class="hidden">
+            <div id="practice-content"></div>
+        </div>
+        <div id="page-dialogue" class="hidden">
+            <div id="dialogue-content"></div>
+        </div>
+        <div id="page-mine" class="hidden">
+            <div id="mine-content"></div>
+        </div>
+    </div>
+
+    <!-- ===== 红包弹窗 ===== -->
+    <div class="modal-overlay" id="redpacket-modal">
+        <div class="modal-box">
+            <h3>🎁 申请现金红包</h3>
+            <p style="color:#666;margin-bottom:12px;">恭喜您达成小节奖杯！填写信息申请。</p>
+            <input type="text" id="realname-input" placeholder="您的姓名">
+            <input type="text" id="alipay-input" placeholder="支付宝账号">
+            <button class="btn btn-primary" onclick="submitRedpacket()">提交申请</button>
+            <button class="btn btn-outline" style="margin-top:8px;" onclick="closeModal()">取消</button>
+        </div>
+    </div>
+
+    <!-- ===== 底部导航 ===== -->
+    <div style="display:flex; background:#fff; border-top:1px solid #ddd; padding:8px 0; margin-top:20px;">
+        <button class="nav-item" data-tab="study" onclick="switchTab('study')"
+            style="flex:1; background:none; border:none; font-size:16px;">📖 学习</button>
+        <button class="nav-item" data-tab="mine" onclick="switchTab('mine')"
+            style="flex:1; background:none; border:none; font-size:16px;">👤 我的</button>
+    </div>
+
+    <script>
+        // ================================================================
+        // 1. 数据模型（第一学期 · 第一单元 · 两个小节）
+        // ================================================================
+        const courses = [{
+            id: 1,
+            name: '第一学期',
+            units: [{
+                id: 1,
+                name: '第一单元 · 基础社交与礼节',
+                sections: [
+                    // ============================================================
+                    // 第一小节：1. 礼貌用语（词汇ID V1~V10，对话D1，8句）
+                    // ============================================================
+                    {
+                        id: 1,
+                        name: '1. 礼貌用语',
+                        vocabularies: [
+                            {id: 'V1', yue: '早晨', zh: '早上好', pinyin_yue: 'zou2 san4', pinyin_zh: 'zao3 shang4 hao3'},
+                            {id: 'V2', yue: '你好', zh: '你好', pinyin_yue: 'nei5 hou2', pinyin_zh: 'ni3 hao3'},
+                            {id: 'V3', yue: '唔该', zh: '谢谢/劳驾', pinyin_yue: 'm4 goi1', pinyin_zh: 'xie4 xie4 / lao2 jia4'},
+                            {id: 'V4', yue: '多谢', zh: '多谢', pinyin_yue: 'do1 ze6', pinyin_zh: 'duo1 xie4'},
+                            {id: 'V5', yue: '对唔住', zh: '对不起', pinyin_yue: 'deoi3 m4 zyu6', pinyin_zh: 'dui4 bu5 qi3'},
+                            {id: 'V6', yue: '唔好意思', zh: '不好意思', pinyin_yue: 'm4 hou2 ji3 si1', pinyin_zh: 'bu4 hao3 yi4 si5'},
+                            {id: 'V7', yue: '请', zh: '请', pinyin_yue: 'cing2', pinyin_zh: 'qing3'},
+                            {id: 'V8', yue: '拜拜', zh: '再见', pinyin_yue: 'baai1 baai1', pinyin_zh: 'bai4 bai4'},
+                            {id: 'V9', yue: '请坐', zh: '请坐', pinyin_yue: 'cing2 co5', pinyin_zh: 'qing3 zuo4'},
+                            {id: 'V10', yue: '得闲饮茶', zh: '有空喝茶（客套话）', pinyin_yue: 'dak1 haan4 jam2 caa4', pinyin_zh: 'de2 xian2 yin3 cha2'}
+                        ],
+                        dialogues: [{
+                            id: 'D1',
+                            title: '问路场景）',
+                            lines: [
+                                {speaker: '游客', yue: '唔该，请问上下九步行街点行啊？', zh: '劳驾，请问上下九步行街怎么走？'},
+                                {speaker: '店员', yue: '你行前两个路口，转左就见到啦。', zh: '你往前走两个路口，左转就看到了。'},
+                                {speaker: '游客', yue: '多谢晒！附近有有地铁站？', zh: '太谢谢了！那附近有地铁站吗？'},
+                                {speaker: '店员', yue: '有啊，行多五分钟就到公园前站。', zh: '有的，再走五分钟就到公园前站。'},
+                                {speaker: '游客', yue: '唔好意思，再问下，呢度收唔收现金？', zh: '不好意思，再问一下，这里收现金吗？'},
+                                {speaker: '店员', yue: '收，不过最好用微信支付。', zh: '收，不过最好用微信支付。'},
+                                {speaker: '游客', yue: '好，唔该晒你！', zh: '好，太感谢您了！'},
+                                {speaker: '店员', yue: '唔使客气，玩得开心哟。', zh: '不客气，玩得开心点。'}
+                            ],
+                            keyWords: [
+                                {id: 'K1', yue: '步行街', zh: '怎么走'},
+                                {id: 'K2', yue: '路口', zh: '左转'},
+                                {id: 'K3', yue: '地铁', zh: '附近'},
+                                {id: 'K4', yue: '微信支付', zh: '公园前站'}
+                            ]
+                        }]
+                    },
+                    // ============================================================
+                    // 第二小节：2. 日常用语（买菜场景，词汇ID V1~V10，对话D1，8句）
+                    // ============================================================
+                    {
+                        id: 2,
+                        name: '2. 日常用语',
+                        vocabularies: [
+                            {id: 'V1', yue: '几多钱一斤', zh: '多少钱一斤', pinyin_yue: 'gei2 do1 cin2 jat1 gan1', pinyin_zh: 'duo1 shao3 qian2 yi1 jin1'},
+                            {id: 'V2', yue: '点卖', zh: '怎么卖', pinyin_yue: 'dim2 maai6', pinyin_zh: 'zen3 me5 mai4'},
+                            {id: 'V3', yue: '称下', zh: '称一下', pinyin_yue: 'cing1 haa5', pinyin_zh: 'cheng1 yi1 xia4'},
+                            {id: 'V4', yue: '缺斤少两', zh: '缺斤少两', pinyin_yue: 'kyut3 gan1 siu2 loeng5', pinyin_zh: 'que1 jin1 shao3 liang3'},
+                            {id: 'V5', yue: '半斤', zh: '半斤', pinyin_yue: 'bun3 gan1', pinyin_zh: 'ban4 jin1'},
+                            {id: 'V6', yue: '平啲', zh: '便宜点', pinyin_yue: 'ping4 di1', pinyin_zh: 'pian2 yi2 dian3'},
+                            {id: 'V7', yue: '打包袋', zh: '打包袋', pinyin_yue: 'daa2 baau1 doi6', pinyin_zh: 'da3 bao1 dai4'},
+                            {id: 'V8', yue: '保鲜盒', zh: '保鲜盒', pinyin_yue: 'bou2 sin1 hap6', pinyin_zh: 'bao3 xian1 he2'},
+                            {id: 'V9', yue: '要呢个', zh: '要这个', pinyin_yue: 'jiu3 ni1 go3', pinyin_zh: 'yao4 zhe4 ge4'},
+                            {id: 'V10', yue: '唔要嗰个', zh: '不要那个', pinyin_yue: 'm4 jiu3 go2 go3', pinyin_zh: 'bu4 yao4 na4 ge4'}
+                        ],
+                        dialogues: [{
+                            id: 'D1',
+                            title: '买菜场景',
+                            lines: [
+                                {speaker: '小陈', yue: '老板，呢个菜心几多钱一斤？', zh: '老板，这个菜心多少钱一斤？'},
+                                {speaker: '卖家', yue: '五蚊一斤，你买两斤我收你九蚊。', zh: '五块一斤，你买两斤我收你九块。'},
+                                {speaker: '小陈', yue: '咁称下两斤俾我，要呢两扎。打包分开两个袋，唔该。', zh: '那称两斤给我，要这两把。打包分开两个袋子，谢谢。'},
+                                {speaker: '卖家', yue: '好，扫码定现金？', zh: '好，扫码还是现金？'},
+                                {speaker: '小陈', yue: '扫码啦，扫边个码？', zh: '扫码吧，扫哪个码？'},
+                                {speaker: '卖家', yue: '呢个支付宝码，扫完俾我睇下。', zh: '这个支付宝码，扫完给我看一下。'},
+                                {speaker: '小陈', yue: '搞掂，下次再帮衬。', zh: '好了，下次再来光顾。'}
+                            ],
+                            keyWords: [
+                                {id: 'K1', yue: '菜心', zh: '菜心'},
+                                {id: 'K2', yue: '两斤', zh: '新鲜'},
+                                {id: 'K3', yue: '打包', zh: '打包'},
+                                {id: 'K4', yue: '扫码', zh: '扫码'},
+                                {id: 'K5', yue: '支付宝', zh: '支付宝'}
+                            ]
+                        }]
+                    }
+                ]
+            }]
+        }];
+
+        // ================================================================
+        // 2. 全局状态
+        // ================================================================
+        let currentCourseId = 1;
+        let currentUnitId = 1;
+        let currentSectionIndex = 0;
+        let currentVocabIndex = 0;
+        let currentLang = 'yue';
+
+        // ================================================================
+        // 3. 数据持久化
+        // ================================================================
+        function getStore() {
+            const raw = localStorage.getItem('yue_learn_data');
+            if (raw) try {return JSON.parse(raw);} catch (e) { }
+            return {dailyRecords: {}, totalPoints: 0, achievements: {}, userInfo: {name: '', alipay: ''}};
+        }
+        function saveStore(data) {localStorage.setItem('yue_learn_data', JSON.stringify(data));}
+        function today() {return new Date().toISOString().slice(0, 10);}
+
+        function recordScore(courseId, unitId, sectionId, itemId, type, score) {
+            const store = getStore();
+            const day = today();
+            if (!store.dailyRecords[day]) {
+                store.dailyRecords[day] = {tasks: [], totalScore: 0, count: 0, completed: false};
+            }
+            const dayData = store.dailyRecords[day];
+            let task = dayData.tasks.find(t =>
+                t.courseId === courseId && t.unitId === unitId &&
+                t.sectionId === sectionId && t.itemId === itemId && t.type === type
+            );
+            if (!task) {
+                task = {courseId, unitId, sectionId, itemId, type, scores: []};
+                dayData.tasks.push(task);
+            }
+            task.scores.push(score);
+            dayData.totalScore += score;
+            dayData.count += 1;
+
+            // ★★★ 累加到总积分（每次评分得分都加入总积分） ★★★
+            store.totalPoints = (store.totalPoints || 0) + score;
+
+            saveStore(store);
+            updateDailyCompletion();
+            updateTotalPoints();
+            checkSectionAchievement(courseId, unitId, sectionId);
+            checkAchievements();
+        }
+        function updateDailyCompletion() { }
+        function updateTotalPoints() { }
+        function checkSectionAchievement(courseId, unitId, sectionId) { /* 简化 */}
+        // ---- 词汇练习状态管理 ----
+        function markVocabPracticed(courseId, unitId, sectionId, vocabId) {
+            const key = `practiced_${courseId}_${unitId}_${sectionId}_${vocabId}`;
+            const store = getStore();
+            store.achievements[key] = true;
+            saveStore(store);
+            checkAndShowCompletion();
+        }
+
+        function checkAllVocabScored(section) {
+            const store = getStore();
+            for (let v of section.vocabularies) {
+                const key = `practiced_${currentCourseId}_${currentUnitId}_${section.id}_${v.id}`;
+                if (!store.achievements[key]) return false;
+            }
+            return true;
+        }
+
+        // ================================================================
+        // 4. 页面导航
+        // ================================================================
+        function showPage(pageId) {
+            document.querySelectorAll('#main-content > div').forEach(el => el.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+        function goBack() {
+            const practice = document.getElementById('page-practice');
+            const dialogue = document.getElementById('page-dialogue');
+            const sections = document.getElementById('page-sections');
+            const units = document.getElementById('page-units');
+            if (!dialogue.classList.contains('hidden')) {
+                showPage('page-practice');
+                renderPractice();
+            } else if (!practice.classList.contains('hidden')) {
+                showPage('page-sections');
+                renderSections();
+            } else if (!sections.classList.contains('hidden')) {
+                showPage('page-units');
+                renderUnits();
+            } else if (!units.classList.contains('hidden')) {
+                showPage('page-courses');
+                renderCourses();
+            } else {
+                showPage('page-courses');
+                renderCourses();
+            }
+        }
+
+        function renderCourses() {
+            const container = document.getElementById('course-list');
+            const store = getStore();
+            let html = '';
+
+            courses.forEach(c => {
+                // 计算该学期所有词汇的完成度
+                let totalVocab = 0;
+                let doneVocab = 0;
+                c.units.forEach(u => {
+                    u.sections.forEach(s => {
+                        s.vocabularies.forEach(v => {
+                            totalVocab++;
+                            const key = `practiced_${c.id}_${u.id}_${s.id}_${v.id}`;
+                            if (store.achievements[key]) doneVocab++;
+                        });
+                    });
+                });
+                const progress = totalVocab > 0 ? (doneVocab / totalVocab) * 100 : 0;
+                const percent = Math.round(progress);
+
+                html += `
+            <div class="progress-card" onclick="selectCourse(${c.id})">
+                <div class="title">${c.name}</div>
+                <div class="progress-wrap">
+                    <div class="progress-bar" style="width:${progress}%;"></div>
+                    <div class="progress-num" style="left:${Math.min(progress, 94)}%;">${percent}%</div>
+                </div>
+            </div>
+        `;
+            });
+
+            container.innerHTML = html;
+        }
+        function selectCourse(id) {currentCourseId = id; showPage('page-units'); renderUnits();}
+        function renderUnits() {
+            const course = courses.find(c => c.id === currentCourseId);
+            const container = document.getElementById('unit-list');
+            const store = getStore();
+            let html = '';
+
+            course.units.forEach(u => {
+                // 计算该单元所有词汇的完成度
+                let totalVocab = 0;
+                let doneVocab = 0;
+                u.sections.forEach(s => {
+                    s.vocabularies.forEach(v => {
+                        totalVocab++;
+                        const key = `practiced_${currentCourseId}_${u.id}_${s.id}_${v.id}`;
+                        if (store.achievements[key]) doneVocab++;
+                    });
+                });
+                const progress = totalVocab > 0 ? (doneVocab / totalVocab) * 100 : 0;
+                const percent = Math.round(progress);
+
+                html += `
+            <div class="progress-card" onclick="selectUnit(${u.id})">
+                <div class="title">${u.name}</div>
+                <div class="progress-wrap">
+                    <div class="progress-bar" style="width:${progress}%;"></div>
+                    <div class="progress-num" style="left:${Math.min(progress, 94)}%;">${percent}%</div>
+                </div>
+            </div>
+        `;
+            });
+
+            container.innerHTML = html;
+        }
+        function selectUnit(id) {currentUnitId = id; showPage('page-sections'); renderSections();}
+        function renderSections() {
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const container = document.getElementById('section-list');
+            const store = getStore();
+            let html = '';
+
+            unit.sections.forEach((s, idx) => {
+                // 计算该小节词汇的完成度
+                let totalVocab = s.vocabularies.length;
+                let doneVocab = 0;
+                s.vocabularies.forEach(v => {
+                    const key = `practiced_${currentCourseId}_${currentUnitId}_${s.id}_${v.id}`;
+                    if (store.achievements[key]) doneVocab++;
+                });
+                const progress = totalVocab > 0 ? (doneVocab / totalVocab) * 100 : 0;
+                const percent = Math.round(progress);
+
+                html += `
+            <div class="progress-card" onclick="selectSection(${idx})">
+                <div class="title">${s.name}</div>
+                <div class="progress-wrap">
+                    <div class="progress-bar" style="width:${progress}%;"></div>
+                    <div class="progress-num" style="left:${Math.min(progress, 94)}%;">${percent}%</div>
+                </div>
+            </div>
+        `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function selectSection(index) {
+            currentSectionIndex = index;
+            currentVocabIndex = 0;
+            showPage('page-practice');
+            renderPractice();
+        }
+
+        // ================================================================
+        // 5. 词汇练习页（录音回放 + 手写/打字输入）
+        // ================================================================
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordedBlob = null;
+        let isRecording = false;
+
+        function renderPractice() {
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+
+            const vocabList = section.vocabularies;
+            if (vocabList.length === 0) {
+                document.getElementById('practice-content').innerHTML = '<p>该小节暂无词汇。</p>';
+                return;
+            }
+            if (currentVocabIndex >= vocabList.length) currentVocabIndex = 0;
+            const currentVocab = vocabList[currentVocabIndex];
+
+            let html = `<h3 style="margin-bottom:12px;">${section.name}</h3>`;
+
+            // 语言切换
+            html += `<div class="lang-toggle">
+                        <button class="btn btn-outline ${currentLang === 'yue' ? 'active' : ''}" onclick="switchLanguage('yue')">🇭🇰 粤语</button>
+                        <button class="btn btn-outline ${currentLang === 'zh' ? 'active' : ''}" onclick="switchLanguage('zh')">🇨🇳 普通话</button>
+                     </div>`;
+
+            // 词语卡片
+            const displayText = currentLang === 'yue' ? currentVocab.yue : currentVocab.zh;
+            const pinyin = currentLang === 'yue' ? currentVocab.pinyin_yue : currentVocab.pinyin_zh;
+            const total = vocabList.length;
+            html += `<div class="card">
+                        <div style="display:flex; justify-content:space-between; color:#888; font-size:14px;">
+                            <span>词汇 ${currentVocabIndex + 1} / ${total}</span>
+                            <span>${pinyin || ''}</span>
+                        </div>
+                        <div class="standard-text" id="standard-text">${displayText}</div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="playAudio()">🔊 播放</button>
+                        </div>
+                        <div class="nav-buttons">
+                            <button class="btn btn-outline" onclick="prevVocab()" ${currentVocabIndex === 0 ? 'disabled' : ''}>⬅️ 上一个</button>
+                            <button class="btn btn-outline" onclick="nextVocab()" ${currentVocabIndex === total - 1 ? 'disabled' : ''}>下一个 ➡️</button>
+                        </div>
+                    </div>`;
+
+            // ---- 跟读评分（录音+回放） ----
+            html += `<div class="card">
+                        <h4>🎤 跟读评分（回放音频多对比练练就对啦）</h4>
+                        <div class="btn-group" style="margin:12px 0;">
+                            <button class="btn btn-danger" id="record-btn" onclick="toggleRecording()">🎙️ 开始录音</button>
+                            <button class="btn btn-outline" id="playback-btn" onclick="playbackRecording()" disabled>🔊 回放</button>
+                        </div>
+                        <div id="recording-status" style="margin:8px 0; color:#888;">状态：就绪</div>
+                        <!-- 语音输入评分（系统输入法语音） -->
+                        <div style="margin-top:12px; border-top:1px solid #eee; padding-top:12px;">
+                            <div style="font-size:14px; color:#999;">💡 使用语音输入进行评分：</div>
+                            <div class="input-group">
+                                <input type="text" id="speech-input" placeholder="点击键盘🎤说话...">
+                                <button class="btn btn-sm btn-primary" onclick="submitManualScore()">评分</button>
+                            </div>
+                        </div>
+                        <div id="result-area"><p style="color:#999;">等待评分...</p></div>
+                    </div>`;
+
+            // ---- 手写/打字输入（字形识别） ----
+            html += `<div class="card">
+                        <h4>✍️ 手写/拼音输入（记得切换输入法哦）</h4>
+                        <div class="input-group">
+                            <input type="text" id="write-input" placeholder="输入文字...">
+                            <button class="btn btn-primary" onclick="submitScore('write')">比对</button>
+                        </div>
+                        <div id="write-result" style="padding:12px; background:#f7f8fc; border-radius:12px; color:#999;">等待输入...</div>
+                    </div>`;
+
+
+
+            document.getElementById('practice-content').innerHTML = html;
+
+            // 清空输入框
+            const speechInput = document.getElementById('speech-input');
+            const writeInput = document.getElementById('write-input');
+            if (speechInput) speechInput.value = '';
+            if (writeInput) writeInput.value = '';
+            document.getElementById('result-area').innerHTML = '<p style="color:#999;">等待评分...</p>';
+            document.getElementById('write-result').innerHTML = '<p style="color:#999;">等待输入...</p>';
+
+            resetRecorder();
+        }
+
+        // ---- 录音控制 ----
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(audioChunks, {type: 'audio/webm'});
+                    document.getElementById('playback-btn').disabled = false;
+                    document.getElementById('recording-status').textContent = '✅ 录音完成，可回放。';
+                    isRecording = false;
+                    document.getElementById('record-btn').textContent = '🎙️ 开始录音';
+                    document.getElementById('record-btn').classList.remove('recording');
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                document.getElementById('record-btn').textContent = '⏹️ 停止录音';
+                document.getElementById('record-btn').classList.add('recording');
+                document.getElementById('playback-btn').disabled = true;
+                document.getElementById('recording-status').textContent = '🔴 录音中...';
+            } catch (e) {
+                alert('无法访问麦克风，请检查权限设置。');
+                console.error(e);
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        }
+
+        function resetRecorder() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            recordedBlob = null;
+            audioChunks = [];
+            isRecording = false;
+            const recordBtn = document.getElementById('record-btn');
+            if (recordBtn) {
+                recordBtn.textContent = '🎙️ 开始录音';
+                recordBtn.classList.remove('recording');
+            }
+            const playbackBtn = document.getElementById('playback-btn');
+            if (playbackBtn) playbackBtn.disabled = true;
+            const status = document.getElementById('recording-status');
+            if (status) status.textContent = '状态：就绪';
+        }
+
+        function playbackRecording() {
+            if (!recordedBlob) {
+                alert('没有可播放的录音，请先录音。');
+                return;
+            }
+            const url = URL.createObjectURL(recordedBlob);
+            const audio = new Audio(url);
+            audio.onplay = () => document.getElementById('recording-status').textContent = '🔊 回放中...';
+            audio.onended = () => {
+                document.getElementById('recording-status').textContent = '✅ 回放结束';
+                URL.revokeObjectURL(url);
+            };
+            audio.play().catch(e => alert('播放失败，请重试'));
+        }
+
+        // ---- 手动/语音输入评分 ----
+        function submitManualScore() {
+            const input = document.getElementById('speech-input');
+            if (!input) return;
+            const userText = input.value.trim();
+            if (!userText) {alert('请输入内容'); return;}
+            const section = getCurrentSection();
+            const vocab = section.vocabularies[currentVocabIndex];
+            if (!vocab) return;
+            const standard = currentLang === 'yue' ? vocab.yue : vocab.zh;
+            const resultHtml = evaluateText(standard, userText);
+            document.getElementById('result-area').innerHTML = resultHtml;
+            const scoreMatch = resultHtml.match(/(\d+)%/);
+            const score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+            recordScore(currentCourseId, currentUnitId, section.id, vocab.id, 'vocab', score);
+            // 标记该词汇已练习
+            markVocabPracticed(currentCourseId, currentUnitId, section.id, vocab.id);
+            // ★★★ 自动弹窗检测 ★★★
+            checkAndShowCompletion();
+            showScoreAnimation(window.innerWidth / 2, window.innerHeight / 2);
+        }
+
+        // ---- 跟写（手写/打字） ----
+        function submitScore(type) {
+            if (type === 'write') {
+                const section = getCurrentSection();
+                const vocab = section.vocabularies[currentVocabIndex];
+                if (!vocab) return;
+                const standard = currentLang === 'yue' ? vocab.yue : vocab.zh;
+                const input = document.getElementById('write-input');
+                if (!input) return;
+                const userText = input.value.trim();
+                if (!userText) {alert('请输入内容！'); return;}
+                const resultHtml = evaluateText(standard, userText);
+                document.getElementById('write-result').innerHTML = resultHtml;
+                const scoreMatch = resultHtml.match(/(\d+)%/);
+                const score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+                recordScore(currentCourseId, currentUnitId, section.id, vocab.id, 'write', score);
+                // 标记该词汇已练习
+                markVocabPracticed(currentCourseId, currentUnitId, section.id, vocab.id);
+                // ★★★ 自动弹窗检测 ★★★
+                checkAndShowCompletion();
+                showScoreAnimation(window.innerWidth / 2, window.innerHeight / 2);
+            }
+        }
+
+        // ---- 新增：公共弹窗检测函数 ----
+        function checkAndShowCompletion() {
+            const section = getCurrentSection();
+            if (checkAllVocabScored(section)) {
+                const hasDialogue = section.dialogues && section.dialogues.length > 0;
+                showCompletionModal(section.name, hasDialogue);
+            }
+        }
+
+        // 显示 +1 动画和彩带
+        function showScoreAnimation(x, y) {
+            // +1 浮动文字
+            const el = document.createElement('div');
+            el.className = 'float-score';
+            el.textContent = '+1 ✨';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+
+            // 彩带 emoji
+            const emojis = ['🎉', '⭐', '🌟', '🎊'];
+            for (let i = 0; i < 6; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                conf.style.left = (x + (Math.random() - 0.5) * 80) + 'px';
+                conf.style.top = (y + (Math.random() - 0.5) * 20) + 'px';
+                conf.style.animationDuration = (1 + Math.random()) + 's';
+                document.body.appendChild(conf);
+                setTimeout(() => conf.remove(), 4000);
+            }
+        }
+
+        function checkDialogueCompletionByLang(lang) {
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogue = section.dialogues[0];
+            const store = getStore();
+            const day = today();
+            const dayData = store.dailyRecords[day];
+            if (!dayData) return false;
+
+            // 收集所有条目（句子和关键词）
+            const allItems = [];
+            dialogue.lines.forEach((line, idx) => {
+                allItems.push({id: `S${idx}`, type: `dialogue_sentence_${lang === 'yue' ? 'YUE' : 'MAN'}`});
+            });
+            dialogue.keyWords.forEach((kw, idx) => {
+                allItems.push({id: `K${idx}`, type: `dialogue_keyword_${lang === 'yue' ? 'YUE' : 'MAN'}`});
+            });
+
+            for (let item of allItems) {
+                const task = dayData.tasks.find(t =>
+                    t.courseId === currentCourseId && t.unitId === currentUnitId &&
+                    t.sectionId === section.id && t.itemId === item.id &&
+                    t.type === item.type
+                );
+                if (!task || task.scores.length === 0) {
+                    return false;
+                }
+                // 可选：检查平均分是否≥60，可根据需求决定
+                const avg = task.scores.reduce((a, b) => a + b, 0) / task.scores.length;
+                if (avg < 60) return false; // 要求得分达标
+            }
+            return true;
+        }
+
+        // 新增：句子完成后引导进入关键词填空
+        function checkAndGuideAfterSentenceDone(lang) {
+            console.log('=== checkAndGuideAfterSentenceDone 被调用 ===');
+            console.log('当前语言:', lang);
+
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogue = section.dialogues[0];
+            const store = getStore();
+            const day = today();
+            const dayData = store.dailyRecords[day];
+            if (!dayData) {
+                console.log('dayData 不存在，退出');
+                return;
+            }
+
+            // 1. 检查所有句子是否已完成（得分≥60）
+            let allSentencesDone = true;
+            for (let i = 0; i < dialogue.lines.length; i++) {
+                const task = dayData.tasks.find(t =>
+                    t.courseId === currentCourseId && t.unitId === currentUnitId &&
+                    t.sectionId === section.id && t.itemId === `S${i}` &&
+                    t.type === `dialogue_sentence_${lang === 'yue' ? 'YUE' : 'MAN'}`
+                );
+                if (!task || task.scores.length === 0) {
+                    allSentencesDone = false;
+                    console.log(`句子 S${i} 未完成或没有评分`);
+                    break;
+                }
+                const avg = task.scores.reduce((a, b) => a + b, 0) / task.scores.length;
+                if (avg < 60) {
+                    allSentencesDone = false;
+                    console.log(`句子 S${i} 平均分 ${avg} < 60`);
+                    break;
+                }
+            }
+            if (!allSentencesDone) {
+                console.log('句子未全部完成，退出');
+                return;
+            }
+            console.log('所有句子已完成');
+
+            // 2. 检查关键词是否已全部完成
+            let allKeywordsDone = true;
+            for (let i = 0; i < dialogue.keyWords.length; i++) {
+                const task = dayData.tasks.find(t =>
+                    t.courseId === currentCourseId && t.unitId === currentUnitId &&
+                    t.sectionId === section.id && t.itemId === `K${i}` &&
+                    t.type === `dialogue_keyword_${lang === 'yue' ? 'YUE' : 'MAN'}`
+                );
+                if (!task || task.scores.length === 0) {
+                    allKeywordsDone = false;
+                    console.log(`关键词 K${i} 未完成或没有评分`);
+                    break;
+                }
+                const avg = task.scores.reduce((a, b) => a + b, 0) / task.scores.length;
+                if (avg < 60) {
+                    allKeywordsDone = false;
+                    console.log(`关键词 K${i} 平均分 ${avg} < 60`);
+                    break;
+                }
+            }
+            if (allKeywordsDone) {
+                console.log('关键词已全部完成，不需要引导');
+                return;
+            }
+            console.log('关键词未全部完成，触发引导');
+
+            // 3. 句子完成但关键词未完成 → 引导进入关键词填空
+            // 调用通关弹窗风格引导
+            showCompletionModal(
+                section.name,
+                false, // 没有对话（但这里我们自定义）
+                '🎯 句子练习完成！<br>快来进行重点词复习吧！',
+                50,   // 奖励50积分
+                '进入重点词练习 →',
+                function () {
+                    closeCompletionModal();
+                    setDialogueMode('keyword', true);
+                },
+                '💪 完成重点词复习，解锁更多积分！'
+            );
+        }
+
+        function grantDialogueReward(lang) {
+            console.log('grantDialogueReward 被调用，语言:', lang);
+            const section = getCurrentSection();
+            const store = getStore();
+            const rewardKey = `dialogue_${lang}_done_${currentCourseId}_${currentUnitId}_${section.id}`;
+
+            // 1. 检查该语言是否全部完成（实时检测）
+            if (!checkDialogueCompletionByLang(lang)) {
+                console.log('该语言未全部完成，退出');
+                return;
+            }
+
+            // 2. 发放积分（仅一次）
+            if (!store.achievements[rewardKey]) {
+                const points = 50;
+                store.totalPoints = (store.totalPoints || 0) + points;
+                store.achievements[rewardKey] = true;
+                saveStore(store);
+                console.log('积分已发放（首次），总积分:', store.totalPoints);
+            } else {
+                console.log('积分已发放过，本次不重复发放');
+            }
+
+            // 3. 弹窗引导（基于实时完成状态，不依赖标记）
+            const yueDone = checkDialogueCompletionByLang('yue');
+            const zhDone = checkDialogueCompletionByLang('zh');
+
+            if (yueDone && zhDone) {
+                // 两种语言都完成 → 单元结算弹窗
+                console.log('两种语言都已完成，弹出单元结算弹窗');
+                showCompletionModal(
+                    section.name,
+                    false,
+                    '🎉 恭喜你！<br>已完成第一单元所有知识！',
+                    50,  // 积分已发放，这里只显示，不再次累加
+                    '返回单元页面',
+                    function () {
+                        closeCompletionModal();
+                        showPage('page-units');
+                        renderUnits();
+                    },
+                    '📚 复习整个单元，积分更多哦！',
+                    true   // 隐藏次要按钮
+                );
+            } else {
+                // 只有当前语言完成 → 语言切换引导
+                const langName = lang === 'yue' ? '粤语' : '普通话';
+                const targetLang = lang === 'yue' ? 'zh' : 'yue';
+                const targetLangName = targetLang === 'yue' ? '粤语' : '普通话';
+                console.log('另一种语言未完成，弹出语言切换引导');
+                showCompletionModal(
+                    section.name,
+                    false,
+                    `🎉 真棒！<br>你已经练习完${langName}第一单元对话！`,
+                    50,
+                    `切换至${targetLangName}练习 →`,
+                    function () {
+                        closeCompletionModal();
+                        switchLanguage(targetLang);
+                        renderDialoguePractice();
+                        highlightLangButton(targetLang);
+                    },
+                    '🌟 完成两种语言对话，获得双倍积分！',
+                    false   // 显示次要按钮（返回小节列表）
+                );
+            }
+        }
+
+        function checkAchievements() {
+            const store = getStore();
+            const now = new Date().toISOString().slice(0, 10);
+            let changed = false;
+
+            // 1. 计算累计学习天数
+            const days = Object.keys(store.dailyRecords).filter(d => {
+                const dayData = store.dailyRecords[d];
+                return dayData.count > 0 || dayData.tasks?.length > 0;
+            });
+            const totalDays = days.length;
+
+            // 2. 计算连续学习天数
+            let consecutive = 0;
+            let checkDate = new Date();
+            while (true) {
+                const d = checkDate.toISOString().slice(0, 10);
+                if (store.dailyRecords[d] && (store.dailyRecords[d].count > 0 || store.dailyRecords[d].tasks?.length > 0)) {
+                    consecutive++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else break;
+            }
+
+            // 3. 检查完美小节
+            let perfectSections = [];
+            courses.forEach(c => {
+                c.units.forEach(u => {
+                    u.sections.forEach(s => {
+                        let allPerfect = true;
+                        for (let v of s.vocabularies) {
+                            // 检查该词汇是否曾有100分（从 dailyRecords 中搜索）
+                            let hasPerfect = false;
+                            for (let d in store.dailyRecords) {
+                                const tasks = store.dailyRecords[d].tasks || [];
+                                const task = tasks.find(t =>
+                                    t.courseId === c.id && t.unitId === u.id &&
+                                    t.sectionId === s.id && t.itemId === v.id
+                                );
+                                if (task && task.scores.some(score => score === 100)) {
+                                    hasPerfect = true;
+                                    break;
+                                }
+                            }
+                            if (!hasPerfect) {allPerfect = false; break;}
+                        }
+                        if (allPerfect) {
+                            perfectSections.push({courseId: c.id, unitId: u.id, sectionId: s.id, name: s.name});
+                        }
+                    });
+                });
+            });
+
+            // 4. 积分里程碑
+            const totalPoints = store.totalPoints || 0;
+
+            // --- 发放奖励 ---
+            const milestones = [
+                {type: 'days', key: 'days_3', threshold: 3, points: 10, name: '初出茅庐'},
+                {type: 'days', key: 'days_7', threshold: 7, points: 20, name: '持之以恒'},
+                {type: 'days', key: 'days_14', threshold: 14, points: 30, name: '坚持不懈'},
+                {type: 'days', key: 'days_30', threshold: 30, points: 50, name: '学习大师'},
+                {type: 'consecutive', key: 'consec_3', threshold: 3, points: 15, name: '三天热忱'},
+                {type: 'consecutive', key: 'consec_7', threshold: 7, points: 30, name: '一周坚持'},
+                {type: 'consecutive', key: 'consec_14', threshold: 14, points: 50, name: '双周毅力'},
+                {type: 'consecutive', key: 'consec_30', threshold: 30, points: 80, name: '月度之星'},
+                {type: 'points', key: 'points_100', threshold: 100, points: 10, name: '小有积蓄'},
+                {type: 'points', key: 'points_500', threshold: 500, points: 25, name: '积分达人'},
+                {type: 'points', key: 'points_1000', threshold: 1000, points: 50, name: '积分富翁'},
+            ];
+
+            for (let m of milestones) {
+                const achKey = `achv_${m.key}`;
+                if (store.achievements[achKey]) continue; // 已领取
+
+                let achieved = false;
+                if (m.type === 'days' && totalDays >= m.threshold) achieved = true;
+                else if (m.type === 'consecutive' && consecutive >= m.threshold) achieved = true;
+                else if (m.type === 'points' && totalPoints >= m.threshold) achieved = true;
+
+                if (achieved) {
+                    store.achievements[achKey] = true;
+                    store.totalPoints = (store.totalPoints || 0) + m.points;
+                    // 记录成就详情（可选）
+                    if (!store.achieveDetails) store.achieveDetails = {};
+                    store.achieveDetails[achKey] = {name: m.name, points: m.points, date: now};
+                    changed = true;
+                    // 可以在这里弹出提示，但为了不打扰，可以先静默加积分
+                }
+            }
+
+            // 检查完美小节成就
+            for (let ps of perfectSections) {
+                const achKey = `achv_perfect_${ps.courseId}_${ps.unitId}_${ps.sectionId}`;
+                if (store.achievements[achKey]) continue;
+                store.achievements[achKey] = true;
+                store.totalPoints = (store.totalPoints || 0) + 30;
+                if (!store.achieveDetails) store.achieveDetails = {};
+                store.achieveDetails[achKey] = {name: `完美掌握「${ps.name}」`, points: 30, date: now};
+                changed = true;
+            }
+
+            if (changed) {
+                saveStore(store);
+                // 可弹窗提示“获得新成就！”但建议在“我的”页面显示
+            }
+        }
+
+        // ---- 文本对比函数（支持忽略括号和斜杠） ----
+        function evaluateText(correct, user) {
+            if (!user) return `<p>❌ 未输入内容</p>`;
+
+            function computeDiff(a, b) {
+                const m = a.length, n = b.length;
+                const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
+                for (let i = 1; i <= m; i++) {
+                    for (let j = 1; j <= n; j++) {
+                        if (a[i - 1] === b[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+                        else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+                const diff = [];
+                let i = m, j = n;
+                while (i > 0 || j > 0) {
+                    if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
+                        diff.push({value: a[i - 1], added: false, removed: false});
+                        i--; j--;
+                    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                        diff.push({value: b[j - 1], added: true, removed: false});
+                        j--;
+                    } else if (i > 0 && (j === 0 || dp[i - 1][j] > dp[i][j - 1])) {
+                        diff.push({value: a[i - 1], added: false, removed: true});
+                        i--;
+                    }
+                }
+                return diff.reverse();
+            }
+
+            // 显示高亮（原始文本）
+            const diffRaw = computeDiff(correct.split(''), user.split(''));
+            let html = '<p><strong>你的输入：</strong> ';
+            diffRaw.forEach(part => {
+                const color = part.added ? '#34c759' : part.removed ? '#ff3b30' : '#1a1a2e';
+                html += `<span style="color:${color}; font-weight:${part.removed || part.added ? '600' : '400'};">${part.value}</span>`;
+            });
+            html += '</p>';
+
+            // 评分部分：标准化（去括号，处理斜杠）
+            function normalize(str) {
+                // 去除括号及其内容，并移除所有标点符号（中英文）
+                let cleaned = str.replace(/[（(][^）)]*[）)]/g, '').trim();
+                // 移除常见标点：，。！？、；：""''（）《》…—·，。！？；：""''
+                cleaned = cleaned.replace(/[，。！？、；：""''（）《》…—·,\.!\?\?;:"'()\u3000-\u303F]/g, '');
+                return cleaned.trim();
+            }
+            const normCorrect = normalize(correct);
+            const normUser = normalize(user);
+
+            let score = 0;
+            if (normCorrect === '' || normUser === '') {
+                const diffRaw = computeDiff(correct.split(''), user.split(''));
+                let errors = 0;
+                diffRaw.forEach(part => {if (part.removed || part.added) errors += part.value.length;});
+                score = Math.max(0, Math.round(((correct.length - errors) / correct.length) * 100));
+            } else if (normCorrect.includes('/')) {
+                const candidates = normCorrect.split('/').map(s => s.trim());
+                if (candidates.some(c => c === normUser)) {
+                    score = 100;
+                } else {
+                    const diffNorm = computeDiff(normCorrect.split(''), normUser.split(''));
+                    let errors = 0;
+                    diffNorm.forEach(part => {if (part.removed || part.added) errors += part.value.length;});
+                    score = Math.max(0, Math.round(((normCorrect.length - errors) / normCorrect.length) * 100));
+                }
+            } else {
+                const diffNorm = computeDiff(normCorrect.split(''), normUser.split(''));
+                let errors = 0;
+                diffNorm.forEach(part => {if (part.removed || part.added) errors += part.value.length;});
+                score = Math.max(0, Math.round(((normCorrect.length - errors) / normCorrect.length) * 100));
+            }
+
+            let tip = score === 100 ? '🎉 完美！' :
+                score >= 80 ? '👍 不错！' :
+                    score >= 60 ? '📖 注意差异' : '💪 再练练';
+            html += `<p><strong>准确度：</strong> ${score}%</p>
+             <p style="font-size:14px;color:#666;">${tip}</p>`;
+            return html;
+        }
+
+        // ================================================================
+        // 6. 对话练习（重点词填空）
+        // ================================================================
+        function enterDialogueMode() {
+            // ★★★ 重置句子索引，确保从第一句开始 ★★★
+            window.currentSentenceIndex = 0;
+            if (currentLang !== 'yue' && currentLang !== 'zh') {
+                currentLang = 'yue';
+            }
+            showPage('page-dialogue');
+            renderDialoguePractice();
+        }
+
+        function renderDialoguePractice() {
+            window.currentSentenceIndex = 0; // ★★★ 每次进入对话页重置
+            // ... 原有代码 ...
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogues = section.dialogues;
+            if (!dialogues || dialogues.length === 0) {
+                document.getElementById('dialogue-content').innerHTML = '<p>暂无对话。</p>';
+                return;
+            }
+
+            const dialogue = dialogues[0];
+            const lines = dialogue.lines;
+            const keyWords = dialogue.keyWords;
+
+            // ---- 开始构建界面 ----
+            let html = `<h3 style="margin-bottom:12px;">💬 ${dialogue.title || '对话练习'}</h3>`;
+
+            // ★★★ 语言切换 ★★★
+            html += `<div class="lang-toggle">
+                <button class="btn btn-outline ${currentLang === 'yue' ? 'active' : ''}" id="lang-yue" onclick="switchLanguage('yue')">🇭🇰 粤语</button>
+                <button class="btn btn-outline ${currentLang === 'zh' ? 'active' : ''}" id="lang-zh" onclick="switchLanguage('zh')">🇨🇳 普通话</button>
+             </div>`;
+
+            // ★★★ 对话展示（关键词高亮 + 小喇叭） ★★★
+            html += `<div class="dialogue-box">`;
+            lines.forEach((line, idx) => {
+                const text = currentLang === 'yue' ? line.yue : line.zh;
+                // 高亮关键词
+                let highlightedText = text;
+                const keywords = currentLang === 'yue' ? dialogue.keyWords.map(k => k.yue) : dialogue.keyWords.map(k => k.zh);
+                keywords.forEach(kw => {
+                    const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                    highlightedText = highlightedText.replace(regex, `<span style="color: #e67e22; font-weight: bold; background: #fce8d5; padding: 0 4px; border-radius: 4px;">$&</span>`);
+                });
+                // 小喇叭（点击播放）
+                const speakerIcon = `<span class="speaker-icon" onclick="playDialogueSentence(${idx})" style="cursor:pointer; margin-left:8px; font-size:18px;">🔊</span>`;
+                html += `<div class="line" data-index="${idx}"><strong>${line.speaker}:</strong> ${highlightedText} ${speakerIcon}</div>`;
+            });
+            html += `</div>`;
+
+            // ★★★ 模式选择按钮 ★★★
+            html += `<div style="display:flex; gap:12px; margin:12px 0;">
+                <button class="btn btn-primary" id="mode-sentence" onclick="setDialogueMode('sentence')">📖 逐句跟读</button>
+                <button class="btn btn-outline" id="mode-keyword" onclick="setDialogueMode('keyword')">✍️ 重点词填空</button>
+             </div>`;
+
+            // ★★★ 练习区域 ★★★
+            html += `<div id="dialogue-practice-area" style="margin-top:12px;">`;
+            // 默认显示逐句跟读（需要 renderSentenceMode 函数）
+            html += renderSentenceMode(lines, keyWords);
+            html += `</div>`;
+
+            document.getElementById('dialogue-content').innerHTML = html;
+            // 高亮默认模式按钮（逐句跟读）
+            document.getElementById('mode-sentence').classList.add('active');
+        }
+
+        // 逐句跟读模式渲染
+        function renderSentenceMode(lines, keyWords) {
+            if (typeof currentSentenceIndex === 'undefined') window.currentSentenceIndex = 0;
+            const idx = window.currentSentenceIndex || 0;
+            const line = lines[idx];
+            if (!line) return '<p>句子索引错误</p>';
+            const displayText = currentLang === 'yue' ? line.yue : line.zh;
+            // 高亮关键词
+            let highlightedText = displayText;
+            const keywords = currentLang === 'yue' ? keyWords.map(k => k.yue) : keyWords.map(k => k.zh);
+            keywords.forEach(kw => {
+                const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                highlightedText = highlightedText.replace(regex, `<span style="color: #e67e22; font-weight: bold; background: #fce8d5; padding: 0 4px; border-radius: 4px;">$&</span>`);
+            });
+            let html = `<div class="card">
+                    <div style="display:flex; justify-content:space-between; color:#888; font-size:14px;">
+                        <span>句子 ${idx + 1} / ${lines.length}</span>
+                    </div>
+                    <div class="standard-text" id="dialogue-sentence-text">${highlightedText}</div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="playDialogueSentence(${idx})">🔊 播放</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="dialogue-sentence-input" placeholder="用键盘🎤说话或打字...">
+                        <button class="btn btn-success" onclick="submitDialogueSentence(${idx})">评分</button>
+                    </div>
+                    <div id="dialogue-sentence-result"><p style="color:#999;">等待评分...</p></div>
+                    <div class="nav-buttons">
+                        <button class="btn btn-outline" onclick="dialoguePrevSentence()" ${idx === 0 ? 'disabled' : ''}>⬅️ 上一句</button>
+                        <button class="btn btn-outline" id="dialogue-next-btn" onclick="dialogueNextSentence()" ${idx === lines.length - 1 ? 'disabled' : ''}>下一句 ➡️</button>
+                    </div>
+                </div>`;
+            return html;
+        }
+
+        // 关键词填空模式渲染
+        function renderKeywordMode(keyWords) {
+            let html = `<div class="card">`;
+            keyWords.forEach((kw, i) => {
+                const display = currentLang === 'yue' ? kw.yue : kw.zh;
+                html += `<div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                    <span style="min-width:60px;">关键词 ${i + 1}:</span>
+                    <input type="text" id="dialogue-keyword-input-${i}" placeholder="输入答案..." style="flex:1; padding:10px 16px; border:1px solid #ddd; border-radius:30px; font-size:16px; outline:none;">
+                    <button class="btn btn-sm btn-success" onclick="submitDialogueKeyword(${i})">提交</button>
+                    <span id="dialogue-keyword-result-${i}" style="font-size:14px; color:#888;">等待...</span>
+                 </div>`;
+            });
+            html += `</div>`;
+            return html;
+        }
+
+        function highlightKeywordButton(duration = 7000) {
+            const btn = document.getElementById('mode-keyword');
+            if (btn) {
+                btn.style.transform = 'scale(1.1)';
+                btn.style.transition = 'transform 0.3s, box-shadow 0.3s';
+                btn.style.boxShadow = '0 0 20px #34c759';
+                if (btn._highlightTimer) clearTimeout(btn._highlightTimer);
+                btn._highlightTimer = setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }, duration);
+            }
+        }
+
+        function highlightLangButton(lang, duration = 6000) {
+            const btnId = lang === 'yue' ? 'lang-yue' : 'lang-zh';
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.style.transform = 'scale(1.1)';
+                btn.style.transition = 'transform 0.3s, box-shadow 0.3s';
+                btn.style.boxShadow = '0 0 20px #007aff';
+                if (btn._highlightTimer) clearTimeout(btn._highlightTimer);
+                btn._highlightTimer = setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }, duration);
+            }
+        }
+
+        // 模式切换
+        function setDialogueMode(mode, highlight = false) {
+            const area = document.getElementById('dialogue-practice-area');
+            if (!area) return;
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogue = section.dialogues[0];
+            if (mode === 'sentence') {
+                area.innerHTML = renderSentenceMode(dialogue.lines, dialogue.keyWords);
+            } else if (mode === 'keyword') {
+                area.innerHTML = renderKeywordMode(dialogue.keyWords);
+            }
+            // 按钮高亮
+            document.querySelectorAll('#mode-sentence, #mode-keyword').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mode-${mode}`).classList.add('active');
+            // 如果切换到关键词模式且需要高亮
+            if (highlight && mode === 'keyword') {
+                highlightKeywordButton(7000);
+            }
+        }
+
+        // 逐句跟读操作
+        function playDialogueSentence(index) {
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogue = section.dialogues[0];
+            // 句子音频命名：C{学期}_U{单元}_M{小节}_D{对话ID}_S{句子索引}_{语言}.mp3
+            const langCode = currentLang === 'yue' ? 'YUE' : 'MAN';
+            const fileName = `C${currentCourseId}_U${currentUnitId}_M${currentSectionIndex + 1}_${dialogue.id}_S${index}_${langCode}.mp3`;
+            const resultDiv = document.getElementById('dialogue-sentence-result');
+            if (resultDiv) resultDiv.innerHTML = `🔊 正在加载: ${fileName} ...`;
+            const audio = new Audio(fileName);
+            audio.onplay = () => {if (resultDiv) resultDiv.innerHTML = '🔊 播放中...';};
+            audio.onended = () => {if (resultDiv) resultDiv.innerHTML = '✅ 播放完成';};
+            audio.onerror = () => {
+                if (resultDiv) resultDiv.innerHTML = `❌ 找不到音频文件！请确认 ${fileName} 存在`;
+                alert(`播放失败！请确保 "${fileName}" 在网页同级目录下。`);
+            };
+            audio.play().catch(err => alert('播放出错，请检查音频文件。'));
+        }
+
+        // 高亮“下一句”按钮（评分后引导用户点击）
+        function highlightNextButton(duration = 2000) {
+            const nextBtn = document.getElementById('dialogue-next-btn');
+            if (nextBtn && !nextBtn.disabled) {
+                nextBtn.style.transform = 'scale(1.2)';
+                nextBtn.style.transition = 'transform 0.3s, box-shadow 0.3s';
+                nextBtn.style.boxShadow = '0 0 20px #007aff';
+                if (nextBtn._highlightTimer) clearTimeout(nextBtn._highlightTimer);
+                nextBtn._highlightTimer = setTimeout(() => {
+                    nextBtn.style.transform = 'scale(1)';
+                    nextBtn.style.boxShadow = 'none';
+                }, duration);
+            }
+        }
+
+        function submitDialogueSentence(index) {
+            const input = document.getElementById('dialogue-sentence-input');
+            if (!input) return;
+            const userText = input.value.trim();
+            if (!userText) {alert('请输入内容'); return;}
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogue = section.dialogues[0];
+            const line = dialogue.lines[index];
+            const standard = currentLang === 'yue' ? line.yue : line.zh;
+            const resultHtml = evaluateText(standard, userText);
+            document.getElementById('dialogue-sentence-result').innerHTML = resultHtml;
+            const scoreMatch = resultHtml.match(/(\d+)%/);
+            const score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+            const langSuffix = currentLang === 'yue' ? 'YUE' : 'MAN';
+            recordScore(currentCourseId, currentUnitId, section.id, `S${index}`, `dialogue_sentence_${langSuffix}`, score);
+            showScoreAnimation(window.innerWidth / 2, window.innerHeight / 2);
+            // ★★★ 只保留关键词引导，移除语言切换调用 ★★★
+            checkAndGuideAfterSentenceDone(currentLang);
+            // 延迟执行高亮，确保按钮已渲染
+            setTimeout(() => highlightNextButton(8000), 500);
+        }
+
+        function dialoguePrevSentence() {
+            if (window.currentSentenceIndex > 0) {
+                window.currentSentenceIndex--;
+                setDialogueMode('sentence');
+            }
+        }
+
+        function dialogueNextSentence() {
+            // ★★★ 清除高亮样式 ★★★
+            const nextBtn = document.getElementById('dialogue-next-btn');
+            if (nextBtn) {
+                nextBtn.style.transform = 'scale(1)';
+                nextBtn.style.boxShadow = 'none';
+            }
+
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogue = section.dialogues[0];
+            if (window.currentSentenceIndex < dialogue.lines.length - 1) {
+                window.currentSentenceIndex++;
+                setDialogueMode('sentence');
+            }
+        }
+
+        // 关键词提交
+        function submitDialogueKeyword(index) {
+            const input = document.getElementById(`dialogue-keyword-input-${index}`);
+            if (!input) return;
+            const userText = input.value.trim();
+            if (!userText) {alert('请输入答案！'); return;}
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            const section = unit.sections[currentSectionIndex];
+            const dialogue = section.dialogues[0];
+            const kw = dialogue.keyWords[index];
+            if (!kw) return;
+            const standard = currentLang === 'yue' ? kw.yue : kw.zh;
+            const resultSpan = document.getElementById(`dialogue-keyword-result-${index}`);
+            const resultHtml = evaluateText(standard, userText);
+            resultSpan.innerHTML = resultHtml;
+            const scoreMatch = resultHtml.match(/(\d+)%/);
+            const score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+            const langSuffix = currentLang === 'yue' ? 'YUE' : 'MAN';
+            recordScore(currentCourseId, currentUnitId, section.id, `K${index}`, `dialogue_keyword_${langSuffix}`, score);
+            showScoreAnimation(window.innerWidth / 2, window.innerHeight / 2);
+            // ★★★ 关键词完成后，触发语言切换或单元结算 ★★★
+            grantDialogueReward(currentLang);
+        }
+
+        // 对话完成检测（类似词汇的 checkAndShowCompletion，但用于对话）
+        // ================================================================
+        // 对话完成检测与奖励（支持粤语/普通话分别完成）
+        // ================================================================
+
+        function goBackToVocabulary() {
+            showPage('page-practice');
+            renderPractice();
+        }
+
+        // ================================================================
+        // 7. 共用函数
+        // ================================================================
+        function switchLanguage(lang) {
+            currentLang = lang;
+            const dialoguePage = document.getElementById('page-dialogue');
+            if (!dialoguePage.classList.contains('hidden')) {
+                window.currentSentenceIndex = 0; // ★★★ 切换语言时重置索引
+                renderDialoguePractice();
+            } else {
+                renderPractice();
+            }
+        }
+
+        function prevVocab() {
+            const section = getCurrentSection();
+            if (currentVocabIndex > 0) {
+                currentVocabIndex--;
+                renderPractice();
+            }
+        }
+
+        function nextVocab() {
+            const section = getCurrentSection();
+            // 先检查是否全部完成，如果是则弹窗
+            checkAndShowCompletion();
+            // 如果未完成，则正常翻页
+            if (currentVocabIndex < section.vocabularies.length - 1) {
+                currentVocabIndex++;
+                renderPractice();
+            } else {
+                if (!checkAllVocabScored(section)) {
+                    alert('还有词语未练习，继续加油！');
+                }
+            }
+        }
+
+        function getCurrentSection() {
+            const course = courses.find(c => c.id === currentCourseId);
+            const unit = course.units.find(u => u.id === currentUnitId);
+            return unit.sections[currentSectionIndex];
+        }
+
+        // ---- 播放标准音频（需 MP3 文件，若无则提示） ----
+        function playAudio() {
+            const section = getCurrentSection();
+            const vocab = section.vocabularies[currentVocabIndex];
+            if (!vocab) return;
+            const langCode = currentLang === 'yue' ? 'YUE' : 'MAN';
+            const courseId = currentCourseId;
+            const unitId = currentUnitId;
+            const sectionId = currentSectionIndex + 1;
+            const fileName = `C${currentCourseId}_U${currentUnitId}_M${currentSectionIndex + 1}_${vocab.id}_${langCode}.mp3`;
+            // 这样会变成 C1_U1_M1_D1_S0_YUE.mp3 ✅
+            const status = document.getElementById('result-area');
+            if (status) status.innerHTML = `🔊 正在加载: ${fileName} ...`;
+            const audio = new Audio(fileName);
+            audio.onplay = () => {if (status) status.innerHTML = '🔊 播放中...';};
+            audio.onended = () => {if (status) status.innerHTML = '✅ 播放完成';};
+            audio.onerror = () => {
+                if (status) status.innerHTML = `❌ 找不到音频文件！请确认 ${fileName} 存在`;
+                alert(`播放失败！请确保 "${fileName}" 在网页同级目录下。`);
+            };
+            audio.play().catch(err => alert('播放出错，请检查音频文件。'));
+        }
+
+        // ================================================================
+        // 8. 我的页面（积分、成就、红包）
+        // ================================================================
+        function renderMine() {
+            const container = document.getElementById('mine-content');
+            const store = getStore();
+            const totalPoints = store.totalPoints || 0;
+            const todayStr = today();
+            const dayData = store.dailyRecords[todayStr] || {tasks: [], totalScore: 0, count: 0};
+
+            const todayPoints = dayData.totalScore || 0;
+            const withdraw = (totalPoints * 0.0001).toFixed(2);
+            const todayTasks = dayData.tasks ? dayData.tasks.length : 0;
+
+            // 成就列表
+            let achieveHtml = '';
+            const achKeys = Object.keys(store.achievements).filter(k => k.startsWith('achv_'));
+            if (achKeys.length === 0) {
+                achieveHtml = '<p style="color:#999; text-align:center;">暂无成就，继续学习解锁奖励！</p>';
+            } else {
+                achieveHtml = '<div style="display:flex; flex-wrap:wrap; gap:8px;">';
+                achKeys.forEach(k => {
+                    const detail = store.achieveDetails?.[k];
+                    if (detail) {
+                        achieveHtml += `<div style="background:#f0f4ff; padding:8px 12px; border-radius:12px; display:flex; align-items:center; gap:6px;">
+                        <span>🏅</span>
+                        <span>${detail.name}</span>
+                        <span style="font-size:12px; color:#888;">+${detail.points}</span>
+                    </div>`;
+                    }
+                });
+                achieveHtml += '</div>';
+            }
+
+            // ===== 构建页面 =====
+            let html = `
+        <div class="card">
+            <h3>👤 我的学习</h3>
+            <div class="mine-stat">
+                <div class="stat-item"><div class="num">${totalPoints}</div><div class="label">总积分</div></div>
+                <div class="stat-item"><div class="num">${todayPoints}</div><div class="label">今日积分</div></div>
+                <div class="stat-item"><div class="num">${withdraw}</div><div class="label">可提现（元）</div></div>
+            </div>
+            <div class="progress-bar" style="margin:12px 0;">
+                <div class="fill" style="width:${Math.min(100, todayTasks * 10)}%;"></div>
+            </div>
+            <div style="text-align:center; color:#888; font-size:14px;">今日完成 ${todayTasks} 项练习</div>
+        </div>
+        <div class="card">
+            <h3>🏅 成就</h3>
+            ${achieveHtml}
+        </div>
+        <!-- ★★★ 新增：数据管理卡片 ★★★ -->
+        <div class="card">
+            <h3>💾 数据管理</h3>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <button class="btn btn-outline" onclick="exportData()">📤 备份数据</button>
+                <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">📥 恢复数据</button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            </div>
+            <p style="font-size:12px; color:#888; margin-top:8px;">备份文件可永久保存，换设备后导入即可恢复进度。</p>
+        </div>
+    `;
+
+            container.innerHTML = html;
+        }
+
+        // 导出数据（备份）
+        function exportData() {
+            const data = localStorage.getItem('yue_learn_data');
+            if (!data) {
+                alert('没有数据可备份。');
+                return;
+            }
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `yue_learn_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 导入数据（恢复）
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    localStorage.setItem('yue_learn_data', JSON.stringify(data));
+                    alert('✅ 数据恢复成功！页面即将刷新。');
+                    location.reload();
+                } catch (err) {
+                    alert('❌ 数据格式错误，请检查备份文件。');
+                }
+            };
+            reader.readAsText(file);
+            // 清空 input，允许重复选择同一文件
+            event.target.value = '';
+        }
+
+        function openRedpacketModal() {document.getElementById('redpacket-modal').style.display = 'flex';}
+        function closeModal() {document.getElementById('redpacket-modal').style.display = 'none';}
+        function submitRedpacket() {
+            const name = document.getElementById('realname-input').value.trim();
+            const alipay = document.getElementById('alipay-input').value.trim();
+            if (!name || !alipay) {alert('请完整填写姓名和支付宝账号'); return;}
+            const store = getStore();
+            store.userInfo = {name, alipay};
+            saveStore(store);
+            alert('✅ 申请已提交！管理员会尽快处理。');
+            closeModal();
+        }
+
+        // ================================================================
+        // 9. 底部导航
+        // ================================================================
+        function switchTab(tab) {
+            if (tab === 'study') {
+                showPage('page-courses');
+                renderCourses();
+            } else if (tab === 'mine') {
+                showPage('page-mine');
+                renderMine();
+            }
+        }
+
+        // ================================================================
+        // 通关弹窗控制（增强版，支持自定义内容）
+        // ================================================================
+        function showCompletionModal(sectionName, hasDialogue, customTitle, customPoints, customBtnText, customAction, customHint, hideSecondary) {
+            // 安全设置小节名称
+            const sectionNameEl = document.getElementById('sectionName');
+            if (sectionNameEl) {
+                sectionNameEl.textContent = sectionName;
+            }
+
+            const title = customTitle || `恭喜完成「${sectionName}」所有新词！`;
+            const points = customPoints !== undefined ? customPoints : 100;
+            const btnText = customBtnText || (hasDialogue ? '进入对话练习，检验学习成果 →' : '返回小节列表');
+            const action = customAction || (hasDialogue ? function () {closeCompletionModal(); enterDialogueMode();} : function () {closeCompletionModal(); goBack();});
+            const hint = customHint || '💡 可在「我的」页面查看积分明细';
+
+            const store = getStore();
+            let totalPoints = store.totalPoints || 0;
+            const newTotal = totalPoints + points;
+            const pointsEl = document.getElementById('pointsEarned');
+            pointsEl.textContent = '+0';
+            pointsEl.classList.remove('score-anim');
+            void pointsEl.offsetWidth;
+            pointsEl.classList.add('score-anim');
+            let count = 0;
+            const interval = setInterval(() => {
+                count += 2;
+                if (count >= points) {count = points; clearInterval(interval);}
+                pointsEl.textContent = '+' + count;
+            }, 12);
+            document.getElementById('totalPointsDisplay').textContent = newTotal;
+            const withdraw = (newTotal * 0.0001).toFixed(2);
+            document.getElementById('withdrawAmount').textContent = withdraw;
+            store.totalPoints = newTotal;
+            saveStore(store);
+
+            // 更新标题
+            document.getElementById('completionTitle').innerHTML = title;
+
+            // 更新主按钮
+            const goDialogueBtn = document.getElementById('goDialogueBtn');
+            goDialogueBtn.textContent = btnText;
+            goDialogueBtn.onclick = function () {
+                closeCompletionModal();
+                if (action) action();
+            };
+
+            // 更新次要按钮（根据 hideSecondary 决定是否隐藏）
+            const goBackBtn = document.getElementById('goBackBtn');
+            if (hideSecondary) {
+                goBackBtn.style.display = 'none';
+            } else {
+                goBackBtn.style.display = 'block';
+                goBackBtn.textContent = '返回小节列表';
+                goBackBtn.onclick = function () {
+                    closeCompletionModal();
+                    goBack();
+                };
+            }
+
+            // 更新小字提示
+            document.getElementById('hintText').textContent = hint;
+
+            // 显示弹窗
+            document.getElementById('completionModal').classList.add('active');
+        }
+
+        function closeCompletionModal() {
+            document.getElementById('completionModal').classList.remove('active');
+        }
+
+        // ================================================================
+        // 10. 初始化
+        // ================================================================
+        renderCourses();
+    </script>
+    <!-- ===== 通关弹窗 ===== -->
+    <div class="completion-overlay" id="completionModal">
+        <div class="completion-modal">
+            <div class="stars">
+                <span>⭐</span><span>✨</span><span>⭐</span><span>✨</span><span>⭐</span>
+            </div>
+            <div class="trophy">🏆</div>
+            <div class="title" id="completionTitle">恭喜完成「<span id="sectionName">第一单元 · 1. 礼貌用语</span>」所有新词！</div>
+            <div class="points-box">
+                <span class="label">积分</span>
+                <span class="score" id="pointsEarned">+100</span>
+            </div>
+            <div class="total-points">总积分：<strong id="totalPointsDisplay">1280</strong></div>
+            <div class="withdraw">💰 目前可提现：<span class="amount" id="withdrawAmount">1.2</span> 元</div>
+            <div class="hint" id="hintText">💡 可在「我的」页面查看积分明细</div>
+            <div class="btn-group">
+                <button class="btn-primary" id="goDialogueBtn">进入对话练习，检验学习成果 →</button>
+                <button class="btn-secondary" id="goBackBtn">返回小节列表</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
